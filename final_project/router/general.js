@@ -74,4 +74,17 @@ public_users.get('/review/:isbn',function (req, res) {
     }
 });
 
+public_users.delete('/isbn/:isbn',function (req, res) {
+    const bookId = req.params.isbn;
+
+    // Check if the book exists
+    if (books[bookId]) {
+        delete books[bookId];
+        res.status(200).send('Book deleted successfully');
+    } else {
+        res.status(404).send('Book not found');
+    }
+});
+
+
 module.exports.general = public_users;

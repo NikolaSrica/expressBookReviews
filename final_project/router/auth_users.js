@@ -100,26 +100,34 @@ regd_users.get('/profile', (req, res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
 
-    const bookId = req.params.id;
-    const { reviewer, review } = req.body;
-
+     const bookId = req.params.isbn;
+     const review = req.body.review;
+     const reviewer = req.session.authorization?.username;
     // Check if the book exists
     if (books[bookId]) {
-        const newReviewId = Object.keys(books[bookId].reviews).length + 1;
-        books[bookId].reviews[newReviewId] = { reviewer, review };
-        res.status(201).send('Review added successfully');
+        let reviewUpdated = false;
+
+        // Check if the reviewer already has a review
+        for (let reviewId in books[bookId].reviews) {
+            if (books[bookId].reviews[reviewId].reviewer === reviewer) {
+                // Update the existing review
+                books[bookId].reviews[reviewId].review = review;
+                reviewUpdated = true;
+                break;
+            }
+        }
+
+        if (!reviewUpdated) {
+            // Add a new review if no existing review by the same reviewer
+            const reviewIds = Object.keys(books[bookId].reviews).map(Number);
+            const newReviewId = reviewIds.length > 0 ? Math.max(...reviewIds) + 1 : 1;
+            books[bookId].reviews[newReviewId] = { reviewer, review };
+        }
+
+        res.status(201).send('Review processed successfully');
     } else {
         res.status(404).send('Book not found');
     }
-
-
-
-    const review = req.body.review;
-    const isbn = req.params.isbn;
-    const book = (books[isbn]);
-
-book.reviews.push()
-
 });
 
 module.exports.authenticated = regd_users;
